@@ -1,0 +1,18 @@
+{
+  "name": "i18n-test",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5",
+    "vite-plugin-generate-html-i18n": "^2.1.1"
+  },
+  "dependencies": {
+    "i18next": "^25.1.3"
+  }
+}
