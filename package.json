@@ -10,7 +10,8 @@
   },
   "devDependencies": {
     "vite": "^6.3.5",
-    "vite-plugin-generate-html-i18n": "^2.1.1"
+    "vite-plugin-generate-html-i18n": "^2.1.1",
+    "vite-plugin-virtual-mpa": "^1.12.1"
   },
   "dependencies": {
     "i18next": "^25.1.3"
