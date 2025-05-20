@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/styleSecond.css">
+
+  <title><%= translations.title %></title>
+</head>
+<body>
+  <h1><%= translations.name %></h1>
+  <p><%= translations.description %></p>
+
+  <select id="languageSwitcher" onchange="switchLanguage(this.value)" class="select">
+    <option value="EN" class="select__item"><%= translations.english %></option>
+    <option value="RU"><%= translations.russian %></option>
+  </select>
+
+  <script type="module" src="/src/main.js"></script>
+  <script>
+    function switchLanguage(code) {
+      const page = window.location.pathname.split('/').pop();
+      window.location.href = `${code}_${page}`;
+    }
+  </script>
+</body>
+</html>
