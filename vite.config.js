@@ -2,9 +2,9 @@ import { defineConfig } from 'vite';
 import { createMpaPlugin } from 'vite-plugin-virtual-mpa';
 import fs from 'fs';
 import path from 'path';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 const config = {
+  baseLang: 'ru', // Базовый язык для ключей
   regions: ['ru', 'ua', 'en'],
   languages: ['en', 'ru', 'ua'],
   pagesDir: 'src/pages',
@@ -17,24 +17,29 @@ function generatePages() {
     .filter(file => file.endsWith('.html'))
     .map(file => path.basename(file, '.html'));
 
+  // Загружаем базовый словарь
+  const baseTranslations = JSON.parse(
+    fs.readFileSync(path.join(config.localesDir, `${config.baseLang}.json`), 'utf-8')
+  );
+
+  // Создаем обратный словарь значение -> ключ
+  const reverseDict = createReverseDictionary(baseTranslations);
+
   for (const region of config.regions) {
     for (const lang of config.languages) {
-      const translations = JSON.parse(
-        fs.readFileSync(
-          path.join(config.localesDir, `${lang}.json`),
-          'utf-8'
-        )
+      const currentTranslations = JSON.parse(
+        fs.readFileSync(path.join(config.localesDir, `${lang}.json`), 'utf-8')
       );
 
       for (const template of templates) {
         pages.push({
           name: `${region}-${lang}-${template}`,
-          filename: `${region}-${lang}-${template}.html`,
+          filename: `${region}/${lang}/${template}.html`,
           template: path.join(config.pagesDir, `${template}.html`),
-          data: { // Данные в хтмл
-            lang: lang,
-            region: region,
-            translations: translations
+          data: {
+            lang,
+            region,
+            translations: processTemplate(baseTranslations, currentTranslations, reverseDict, lang)
           }
         });
       }
@@ -43,36 +48,52 @@ function generatePages() {
   return pages;
 }
 
+function createReverseDictionary(translations) {
+  const dict = {};
+  const walk = (obj, path = []) => {
+    for (const key in obj) {
+      const currentPath = [...path, key];
+      if (typeof obj[key] === 'object') {
+        walk(obj[key], currentPath);
+      } else {
+        dict[obj[key]] = currentPath.join('.');
+      }
+    }
+  };
+  walk(translations);
+  return dict;
+}
+
+function processTemplate(baseTranslations, currentTranslations, reverseDict, lang) {
+  return {
+    // Для базового языка вставляем значения напрямую
+    get: (text) => lang === config.baseLang
+      ? text
+      : findTranslation(text, reverseDict, currentTranslations),
+
+    // Для селектора
+    switcher: Object.entries(baseTranslations.buttons.switcher).map(([code, value]) => ({
+      code,
+      text: lang === config.baseLang ? value : currentTranslations.buttons.switcher[code]
+    }))
+  };
+}
+
+function findTranslation(text, reverseDict, translations) {
+  const key = reverseDict[text];
+  return key ? getNestedValue(translations, key) : text;
+}
+
+function getNestedValue(obj, path) {
+  return path.split('.').reduce((o, p) => o?.[p], obj);
+}
+
 export default defineConfig({
   plugins: [
     createMpaPlugin({
       pages: generatePages(),
       template: 'src/template.html',
       preprocessor: 'ejs'
-    }),
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'src/assets/*.{css,js}',
-          dest: 'assets'
-        }
-      ]
     })
-  ],
-  build: {
-    rollupOptions: {
-      output: {
-        entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-
-        // обработка css файлов
-        assetFileNames: (assetInfo) => {
-          if(assetInfo.name.endsWith('.css')) {
-            return 'assets/[name][extname]';
-          }
-          return 'assets/[name]-[hash][extname]';
-        }
-      }
-    }
-  }
+  ]
 });

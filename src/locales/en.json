@@ -1,9 +1,18 @@
 {
-  "name": "Zvonok",
-  "description": "Business Calls - Automate Routine Processes",
-  "calls": "Calls",
-  "call": "Call",
-  "russian": "Russian",
-  "english": "English",
-  "ukrainian": "Ukrainian"
+  "meta": {
+    "title": "Zvonok"
+  },
+  "common": {
+    "name": "Business Calls",
+    "description": "Automate Routine Processes",
+    "calls": "Calls",
+    "call": "Call"
+  },
+  "buttons": {
+    "switcher": {
+      "en": "English",
+      "ru": "Russian",
+      "ua": "Ukrainian"
+    }
+  }
 }
