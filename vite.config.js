@@ -34,7 +34,7 @@ function generatePages() {
       for (const template of templates) {
         pages.push({
           name: `${region}-${lang}-${template}`,
-          filename: `${region}/${lang}/${template}.html`,
+          filename: `${region}-${lang}-${template}.html`,
           template: path.join(config.pagesDir, `${template}.html`),
           data: {
             lang,
