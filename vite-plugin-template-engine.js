@@ -140,7 +140,7 @@ export default function templateEnginePlugin(options = {}) {
             // Check if the template has extends tag
             const hasExtends = extendsRegex.test(content);
             const hasTranslations = translationRegex.test(content);
-
+            // TODO исправить и добавить обработку файлов без перевода тоже(в каком формате нейминга?)
             if (hasTranslations) {
               // Process the template for each region and language
               for (const region of regions) {
@@ -224,50 +224,6 @@ export default function templateEnginePlugin(options = {}) {
 
       // Replace the original bundle with our new one
       Object.assign(bundle, newBundle);
-    },
-    async generateOutputFiles(bundle) {
-      const outputDir = path.resolve(this.config.root, this.config.build.outDir);
-      const templatePath = path.resolve(this.config.root, this.config.build.rollupOptions.input);
-      const templateContent = await fs.readFile(templatePath, 'utf-8');
-
-      // Get all assets from the bundle
-      const assets = Object.entries(bundle).filter(([id]) => {
-        return id.endsWith('.js') || id.endsWith('.css');
-      });
-
-      for (const [region, lang] of this.regions) {
-        const outputPath = path.join(outputDir, region, lang, 'index.html');
-        let content = templateContent;
-
-        // Replace template syntax
-        content = content.replace(/<!--template:([^>]+)-->/g, (match, encoded) => {
-          const template = Buffer.from(encoded, 'base64').toString();
-          return template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
-            const value = this.translations[region][lang][key.trim()];
-            return value !== undefined ? value : match;
-          });
-        });
-
-        // Update asset paths
-        content = content.replace(/\{\{ region \}\}/g, region);
-        content = content.replace(/\{\{ lang \}\}/g, lang);
-
-        // Create output directory if it doesn't exist
-        await fs.mkdir(path.dirname(outputPath), { recursive: true });
-
-        // Write the processed HTML file
-        await fs.writeFile(outputPath, content);
-
-        // Copy and rename assets
-        for (const [assetId, asset] of assets) {
-          const assetName = path.basename(assetId);
-          const newAssetName = `${region}-${lang}-${assetName}`;
-          const assetPath = path.join(outputDir, newAssetName);
-          
-          // Write the asset file
-          await fs.writeFile(assetPath, asset.code || asset.source);
-        }
-      }
     },
     closeBundle: async () => {
       if (debug) {

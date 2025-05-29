@@ -1,7 +1,5 @@
-import './style.css';
-
 const test = () => {
-  console.log('test')
+  console.log('main.js')
 }
 
 test();
