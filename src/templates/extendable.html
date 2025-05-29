@@ -1,0 +1,13 @@
+{% extends "_base.html" %}
+
+{% block title %}Extendable title{% endblock %}
+
+{% block header %}
+  Sooome header
+{% endblock %}
+
+{% block content %}
+  <p>Some content</p>
+  <div> {% translations.get('Звонок') %}</div>
+{% endblock %}
+
