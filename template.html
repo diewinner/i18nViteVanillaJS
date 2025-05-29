@@ -5,13 +5,7 @@
   <title><%= translations.get('Звонки для бизнеса') %></title>
 </head>
 <body>
-  <select id="languageSwitcher">
-    <% translations.switcher.forEach(({code, text}) => { %>
-      <option value="<%= code %>" <%= code === lang ? 'selected' : '' %>>
-        <%= text %>
-      </option>
-    <% }) %>
-  </select>
+    <div>template main</div>
     <main>
     <%- include(template) %>
   </main>

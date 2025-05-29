@@ -15,7 +15,7 @@ const config = {
 function generatePages() {
   const pages = [];
   const files = fs.readdirSync(config.pagesDir)
-    .filter(f => f.endsWith('.html'));
+    .filter(f => f.endsWith('.ejs'));
 
   const baseTrans = JSON.parse(
     fs.readFileSync(path.join(config.localesDir, `${config.baseLang}.json`), 'utf-8')
@@ -28,15 +28,16 @@ function generatePages() {
         fs.readFileSync(path.join(config.localesDir, `${lang}.json`), 'utf-8')
       );
       for (const filename of files) {
-        const tplName = path.basename(filename, '.html');
+        const tplName = path.basename(filename, '.ejs');
         pages.push({
           name: `${region}-${lang}-${tplName}`,
           filename: `${region}/${lang}/${tplName}.html`,
-          template: path.resolve(__dirname, config.pagesDir, `${tplName}.html`),
+          template: path.resolve(__dirname, 'src/template.ejs'),
           data: {
             lang,
             region,
-            translations: processTemplate(baseTrans, currTrans, reverseDict, lang)
+            translations: processTemplate(baseTrans, currTrans, reverseDict, lang),
+            template: `/src/pages/${tplName}`
           }
         });
       }
@@ -89,7 +90,7 @@ export default defineConfig({
   plugins: [
     createMpaPlugin({
       pages: generatePages(),
-      template: 'src/template.html',
+      template: 'src/template.ejs',
       preprocessor: 'ejs'
     })
   ]
