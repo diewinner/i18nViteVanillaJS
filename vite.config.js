@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { createMpaPlugin } from 'vite-plugin-virtual-mpa';
+import {createMpaPlugin, createPages} from 'vite-plugin-virtual-mpa';
 import fs from 'fs';
 import path from 'path';
 
@@ -8,38 +8,35 @@ const config = {
   regions: ['ru', 'ua', 'en'],
   languages: ['en', 'ru', 'ua'],
   pagesDir: 'src/pages',
-  localesDir: 'src/locales'
+  localesDir: 'src/locales',
+  templatesDir: 'templates'
 };
 
 function generatePages() {
   const pages = [];
-  const templates = fs.readdirSync(config.pagesDir)
-    .filter(file => file.endsWith('.html'))
-    .map(file => path.basename(file, '.html'));
+  const files = fs.readdirSync(config.pagesDir)
+    .filter(f => f.endsWith('.html'));
 
-  // Загружаем базовый словарь
-  const baseTranslations = JSON.parse(
+  const baseTrans = JSON.parse(
     fs.readFileSync(path.join(config.localesDir, `${config.baseLang}.json`), 'utf-8')
   );
-
-  // Создаем обратный словарь значение -> ключ
-  const reverseDict = createReverseDictionary(baseTranslations);
+  const reverseDict = createReverseDictionary(baseTrans);
 
   for (const region of config.regions) {
     for (const lang of config.languages) {
-      const currentTranslations = JSON.parse(
+      const currTrans = JSON.parse(
         fs.readFileSync(path.join(config.localesDir, `${lang}.json`), 'utf-8')
       );
-
-      for (const template of templates) {
+      for (const filename of files) {
+        const tplName = path.basename(filename, '.html');
         pages.push({
-          name: `${region}-${lang}-${template}`,
-          filename: `${region}-${lang}-${template}.html`,
-          template: path.join(config.pagesDir, `${template}.html`),
+          name: `${region}-${lang}-${tplName}`,
+          filename: `${region}/${lang}/${tplName}.html`,
+          template: path.resolve(__dirname, config.pagesDir, `${tplName}.html`),
           data: {
             lang,
             region,
-            translations: processTemplate(baseTranslations, currentTranslations, reverseDict, lang)
+            translations: processTemplate(baseTrans, currTrans, reverseDict, lang)
           }
         });
       }

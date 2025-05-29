@@ -14,5 +14,9 @@
       "ru": "Russian",
       "ua": "Ukrainian"
     }
+  },
+  "navigation": {
+    "main": "Main page",
+    "service": "Service"
   }
 }

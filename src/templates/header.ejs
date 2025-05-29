@@ -1,0 +1,10 @@
+<div>
+    <p data-text="Автоматизируйте рутинные процессы"><%= translations.get('Автоматизируйте рутинные процессы') %></p>
+      <select id="languageSwitcher">
+    <% translations.switcher.forEach(({code, text}) => { %>
+      <option value="<%= code %>" <%= code === lang ? 'selected' : '' %>>
+        <%= text %>
+      </option>
+    <% }) %>
+  </select>
+</div>
